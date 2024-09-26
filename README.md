@@ -23,7 +23,9 @@ talking about.
 
 ## Demo
 
-### `.#nixosConfigurations.use-module-filepath` works:
+<details>
+
+<summary>`.#nixosConfigurations.use-module-filepath` evaluates</summary>
 
 ```shell
 $ nix eval .#nixosConfigurations.use-module-filepath.config.system.build.toplevel
@@ -31,7 +33,11 @@ trace: declaring _includeVim
 «derivation /nix/store/dmmxnrhn6c6yibzlcdlwjb1i5akdcjsi-nixos-system-nixos-24.11.20240923.30439d9.drv»
 ```
 
-### `.#nixosConfigurations.use-module-binding` fails to evaluate:
+</details>
+
+<details>
+
+<summary>`.#nixosConfigurations.use-module-binding` fails to evaluate</summary>
 
 ```shell
 $ nix eval .#nixosConfigurations.use-module-binding.config.system.build.toplevel
@@ -70,17 +76,23 @@ error:
 
        … while evaluating the option `environment.systemPackages':
 
-       … while evaluating definitions from `/nix/store/vxrd24hjs9k56cjfhchyy57zs0n8kg84-source/use-module-binding.nix':
+       … while evaluating definitions from `/nix/store/2a556hldrf8pyybk69ykx106drv0rfd0-source/configs/use-module-binding.nix':
 
        (stack trace truncated; use '--show-trace' to show the full, detailed trace)
 
-       error: The option `_includeVim' in `/nix/store/vxrd24hjs9k56cjfhchyy57zs0n8kg84-source/use-module-binding.nix' is already declared in `/nix/store/vxrd24hjs9k56cjfhchyy57zs0n8kg84-source/use-module-binding.nix'.
+       error: The option `_includeVim' in `/nix/store/2a556hldrf8pyybk69ykx106drv0rfd0-source/configs/use-module-binding.nix' is already declared in `/nix/store/2a556hldrf8pyybk69ykx106drv0rfd0-source/configs/use-module-binding.nix'.
 ```
 
-### `.#nixosConfigurations.use-module-binding-with-key` works:
+</details>
+
+<details>
+
+<summary>`.#nixosConfigurations.use-module-binding-with-key` evaluates</summary>
 
 ```shell
 $ nix eval .#nixosConfigurations.use-module-binding-with-key.config.system.build.toplevel
 trace: declaring _includeVim
 «derivation /nix/store/dmmxnrhn6c6yibzlcdlwjb1i5akdcjsi-nixos-system-nixos-24.11.20240923.30439d9.drv»
 ```
+
+</details>

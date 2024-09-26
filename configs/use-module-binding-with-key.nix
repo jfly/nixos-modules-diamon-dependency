@@ -5,7 +5,7 @@
   ...
 }:
 let
-  vim-option = import ./vim-option.nix;
+  vim-option = import ../shared-module/vim-option-with-key.nix;
 in
 {
   imports = [

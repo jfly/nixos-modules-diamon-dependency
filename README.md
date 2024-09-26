@@ -1,44 +1,29 @@
+EDIT: I found <https://github.com/NixOS/nixpkgs/issues/215496> which describes
+this problem.
+
 # Diamond dependencies with the nixpkgs module system
 
-This flake declares 2 `nixosConfigurations`:
+This flake declares 3 `nixosConfigurations`. They all include a nixos module
+module twice (simulating a "diamond dependency"), but in different ways:
 
-- `.#nixosConfigurations.use-module-binding`
-- `.#nixosConfigurations.use-module-filepath`
-
-They both include the `./vim-option.nix` module twice (simulating a "diamond
-dependency"), but in different ways:
-
-`use-module-filepath.nix`:
-```nix
-{
-  imports = [
-    ./vim-option.nix
-    ./vim-option.nix
-  ];
-
-  ...
-}
-```
-
-`use-module-binding.nix`:
-```nix
-let vim-option = import ./vim-option.nix;
-in
-{
-  imports = [
-    vim-option
-    vim-option
-  ];
-
-  ...
-}
-```
+- `.#nixosConfigurations.use-module-filepath`: References the module by path twice.
+- `.#nixosConfigurations.use-module-binding`: Imports the module, stashes it in a `let`, and then uses it twice.
+- `.#nixosConfigurations.use-module-binding-with-key`: Like
+  `use-module-binding`, but uses a different module that declares a `key`.
 
 This "double import via a binding" feels like something that's more likely to
 happen as the nix flake ecosystem evolves: someday you're going to end up using
 module A and module B where module B itself uses module A.
 
-Note that `.#nixosConfigurations.use-module-filepath` evaluates fine:
+I don't know if the fix for this is for all modules to declare a human-chosen
+key, or if this is some not-yet-robustly-solved problem. That might be what the
+discussion over on
+<https://github.com/NixOS/nixpkgs/pull/230588#discussion_r1334294197> is
+talking about.
+
+## Demo
+
+### `.#nixosConfigurations.use-module-filepath` works:
 
 ```shell
 $ nix eval .#nixosConfigurations.use-module-filepath.config.system.build.toplevel
@@ -46,7 +31,7 @@ trace: declaring _includeVim
 «derivation /nix/store/dmmxnrhn6c6yibzlcdlwjb1i5akdcjsi-nixos-system-nixos-24.11.20240923.30439d9.drv»
 ```
 
-However, `.#nixosConfigurations.use-module-binding` fails to evaluate:
+### `.#nixosConfigurations.use-module-binding` fails to evaluate:
 
 ```shell
 $ nix eval .#nixosConfigurations.use-module-binding.config.system.build.toplevel
@@ -90,4 +75,12 @@ error:
        (stack trace truncated; use '--show-trace' to show the full, detailed trace)
 
        error: The option `_includeVim' in `/nix/store/vxrd24hjs9k56cjfhchyy57zs0n8kg84-source/use-module-binding.nix' is already declared in `/nix/store/vxrd24hjs9k56cjfhchyy57zs0n8kg84-source/use-module-binding.nix'.
+```
+
+### `.#nixosConfigurations.use-module-binding-with-key` works:
+
+```shell
+$ nix eval .#nixosConfigurations.use-module-binding-with-key.config.system.build.toplevel
+trace: declaring _includeVim
+«derivation /nix/store/dmmxnrhn6c6yibzlcdlwjb1i5akdcjsi-nixos-system-nixos-24.11.20240923.30439d9.drv»
 ```
